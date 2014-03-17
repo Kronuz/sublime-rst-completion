@@ -294,13 +294,19 @@ class SmartHeaderCommand(BaseBlockCommand):
             region, lines, indent = self.get_block_bounds()
             head_lines = len(lines)
             adornment_char = lines[-1][0]
+            trailing = ''
 
-            if (head_lines not in (2, 3) or
-                    head_lines == 3 and lines[-3][0] != adornment_char):
+            if head_lines == 3 and lines[-3][0] != adornment_char:
+                trailing = '\n' + lines[-1] + '\n'
+                lines = lines[:-1]
+                adornment_char = lines[-1][0]
+                head_lines = len(lines)
+
+            if head_lines not in (2, 3):
                 # invalid header
                 return
 
             title = lines[-2]
             force_overline = head_lines == 3
             result = RstHeaderTree.make_header(title, adornment_char, force_overline)
-            self.view.replace(edit, region, result)
+            self.view.replace(edit, region, result + trailing)
